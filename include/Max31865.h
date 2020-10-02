@@ -14,13 +14,13 @@
 
 #define MAX31865_REG_WRITE_OFFSET 0x80
 
-#define MAX31865_CONFIG_VBIAS_BIT 7
-#define MAX31865_CONFIG_CONVERSIONMODE_BIT 6
-#define MAX31865_CONFIG_1SHOT_BIT 5
-#define MAX31865_CONFIG_NWIRES_BIT 4
-#define MAX31865_CONFIG_FAULTDETECTION_BIT 2
-#define MAX31865_CONFIG_FAULTSTATUS_BIT 1
-#define MAX31865_CONFIG_MAINSFILTER_BIT 0
+#define MAX31865_CONFIG_VBIAS_BIT 7u
+#define MAX31865_CONFIG_CONVERSIONMODE_BIT 6u
+#define MAX31865_CONFIG_1SHOT_BIT 5u
+#define MAX31865_CONFIG_NWIRES_BIT 4u
+#define MAX31865_CONFIG_FAULTDETECTION_BIT 2u
+#define MAX31865_CONFIG_FAULTSTATUS_BIT 1u
+#define MAX31865_CONFIG_MAINSFILTER_BIT 0u
 
 enum class Max31865NWires : uint8_t { Three = 1, Two = 0, Four = 0 };
 enum class Max31865FaultDetection : uint8_t {
@@ -51,6 +51,14 @@ struct max31865_config_t {
 struct max31865_rtd_config_t {
   float ref;
   float nominal;
+
+  /**
+   * Offset adjustment (use zero if unsure).
+   * If there is a known static resistance in your circuit
+   * between your RTD and MAX31865 IC, specify this value here so it is
+   * used to correct the effective RTD value. This is most useful in a 2-wire scenario.
+   */
+   float offsetOhms;
 };
 
 class Max31865 {

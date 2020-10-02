@@ -12,7 +12,7 @@ static constexpr float A[6] = {-242.02,   2.2228,    2.5859e-3,
 
 float Max31865::RTDtoTemperature(uint16_t rtd,
                                  max31865_rtd_config_t rtdConfig) {
-  float Rrtd = (rtd * rtdConfig.ref) / (1U << 15U);
+  float Rrtd = (rtd * rtdConfig.ref) / (1U << 15U) - rtdConfig.offsetOhms;
 
   float Z1, Z2, Z3, Z4, temperature;
   Z1 = -RTD_A;
