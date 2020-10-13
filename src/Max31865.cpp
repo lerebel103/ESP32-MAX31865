@@ -103,8 +103,8 @@ esp_err_t Max31865::begin(max31865_config_t config) {
 
     spi_device_interface_config_t deviceConfig = {};
     deviceConfig.spics_io_num = -1;  // ESP32's hardware CS is too quick
-    deviceConfig.clock_speed_hz = 1500000;
-    deviceConfig.mode = 1;
+    deviceConfig.clock_speed_hz = 1000000;
+    deviceConfig.mode = 3;
     deviceConfig.address_bits = CHAR_BIT;
     deviceConfig.command_bits = 0;
     deviceConfig.flags = SPI_DEVICE_HALFDUPLEX;
@@ -114,6 +114,7 @@ esp_err_t Max31865::begin(max31865_config_t config) {
         ESP_LOGE(TAG, "Error adding SPI device: %s", esp_err_to_name(err));
         return err;
     }
+
     return setConfig(config);
 }
 
@@ -125,9 +126,13 @@ esp_err_t Max31865::writeSPI(uint8_t addr, uint8_t *data, size_t size) {
     transaction.addr = addr | MAX31865_REG_WRITE_OFFSET;
     transaction.flags = SPI_TRANS_USE_TXDATA;
     memcpy(transaction.tx_data, data, size);
+
+    ESP_ERROR_CHECK(spi_device_acquire_bus(deviceHandle, portMAX_DELAY));
     gpio_set_level(static_cast<gpio_num_t>(cs), 0);
-    esp_err_t err = spi_device_polling_transmit(deviceHandle, &transaction);
+    esp_err_t err = spi_device_transmit(deviceHandle, &transaction);
     gpio_set_level(static_cast<gpio_num_t>(cs), 1);
+    spi_device_release_bus(deviceHandle);
+
     return err;
 }
 
@@ -138,9 +143,13 @@ esp_err_t Max31865::readSPI(uint8_t addr, uint8_t *result, size_t size) {
     transaction.rxlength = CHAR_BIT * size;
     transaction.addr = addr & (MAX31865_REG_WRITE_OFFSET - 1);
     transaction.flags = SPI_TRANS_USE_RXDATA;
+
+    ESP_ERROR_CHECK(spi_device_acquire_bus(deviceHandle, portMAX_DELAY));
     gpio_set_level(static_cast<gpio_num_t>(cs), 0);
-    esp_err_t err = spi_device_polling_transmit(deviceHandle, &transaction);
+    esp_err_t err = spi_device_transmit(deviceHandle, &transaction);
     gpio_set_level(static_cast<gpio_num_t>(cs), 1);
+    spi_device_release_bus(deviceHandle);
+
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Error sending SPI transaction: %s", esp_err_to_name(err));
         return err;
@@ -254,7 +263,7 @@ esp_err_t Max31865::getRTD(uint16_t *rtd, Max31865Error *fault) {
             ESP_LOGE(TAG, "Error setting config: %s", esp_err_to_name(err));
             return err;
         }
-        vTaskDelay(pdMS_TO_TICKS(65));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
     if (!chipConfig.autoConversion) {
         //restoreConfig = true;
@@ -271,7 +280,7 @@ esp_err_t Max31865::getRTD(uint16_t *rtd, Max31865Error *fault) {
             ESP_LOGE(TAG, "Error writing config: %s", esp_err_to_name(err));
             return err;
         }
-        vTaskDelay(pdMS_TO_TICKS(130));
+        vTaskDelay(pdMS_TO_TICKS(70));
     } else if (drdy > -1) {
         xSemaphoreTake(drdySemaphore, portMAX_DELAY);
     }
