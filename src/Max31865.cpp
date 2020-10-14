@@ -178,8 +178,6 @@ esp_err_t Max31865::setConfig(max31865_config_t config) {
         configByte |= 1UL << MAX31865_CONFIG_MAINSFILTER_BIT;
     }
 
-    ESP_LOGW(TAG, "Initial register config %d", configByte);
-
     return writeSPI(MAX31865_CONFIG_REG, &configByte, 1);
 }
 
