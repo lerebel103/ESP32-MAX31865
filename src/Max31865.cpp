@@ -103,7 +103,7 @@ esp_err_t Max31865::begin(max31865_config_t config) {
 
     spi_device_interface_config_t deviceConfig = {};
     deviceConfig.spics_io_num = -1;  // ESP32's hardware CS is too quick
-    deviceConfig.clock_speed_hz = 1000000;
+    deviceConfig.clock_speed_hz = 8000000;
     deviceConfig.mode = 3;
     deviceConfig.address_bits = CHAR_BIT;
     deviceConfig.command_bits = 0;
