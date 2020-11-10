@@ -92,6 +92,8 @@ esp_err_t Max31865::begin(max31865_config_t config) {
     busConfig.sclk_io_num = sck;
     busConfig.quadhd_io_num = -1;
     busConfig.quadwp_io_num = -1;
+    busConfig.max_transfer_sz = 0;
+
     esp_err_t err = spi_bus_initialize(hostDevice, &busConfig, 0);
     // INVALID_STATE means the host is already in use - that's OK
     if (err == ESP_ERR_INVALID_STATE) {
@@ -102,8 +104,8 @@ esp_err_t Max31865::begin(max31865_config_t config) {
     }
 
     spi_device_interface_config_t deviceConfig = {};
-    deviceConfig.spics_io_num = -1;  // ESP32's hardware CS is too quick
-    deviceConfig.clock_speed_hz = 8000000;
+    deviceConfig.spics_io_num = cs;  // ESP32's hardware CS is too quick
+    deviceConfig.clock_speed_hz = 10000000;
     deviceConfig.mode = 3;
     deviceConfig.address_bits = CHAR_BIT;
     deviceConfig.command_bits = 0;
@@ -128,9 +130,7 @@ esp_err_t Max31865::writeSPI(uint8_t addr, uint8_t *data, size_t size) {
     memcpy(transaction.tx_data, data, size);
 
     ESP_ERROR_CHECK(spi_device_acquire_bus(deviceHandle, portMAX_DELAY));
-    gpio_set_level(static_cast<gpio_num_t>(cs), 0);
     esp_err_t err = spi_device_transmit(deviceHandle, &transaction);
-    gpio_set_level(static_cast<gpio_num_t>(cs), 1);
     spi_device_release_bus(deviceHandle);
 
     return err;
@@ -145,9 +145,7 @@ esp_err_t Max31865::readSPI(uint8_t addr, uint8_t *result, size_t size) {
     transaction.flags = SPI_TRANS_USE_RXDATA;
 
     ESP_ERROR_CHECK(spi_device_acquire_bus(deviceHandle, portMAX_DELAY));
-    gpio_set_level(static_cast<gpio_num_t>(cs), 0);
     esp_err_t err = spi_device_transmit(deviceHandle, &transaction);
-    gpio_set_level(static_cast<gpio_num_t>(cs), 1);
     spi_device_release_bus(deviceHandle);
 
     if (err != ESP_OK) {
