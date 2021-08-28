@@ -129,9 +129,9 @@ esp_err_t Max31865::writeSPI(uint8_t addr, uint8_t *data, size_t size) {
     transaction.flags = SPI_TRANS_USE_TXDATA;
     memcpy(transaction.tx_data, data, size);
 
-    ESP_ERROR_CHECK(spi_device_acquire_bus(deviceHandle, portMAX_DELAY));
+    //ESP_ERROR_CHECK(spi_device_acquire_bus(deviceHandle, portMAX_DELAY));
     esp_err_t err = spi_device_transmit(deviceHandle, &transaction);
-    spi_device_release_bus(deviceHandle);
+    //spi_device_release_bus(deviceHandle);
 
     return err;
 }
@@ -144,9 +144,9 @@ esp_err_t Max31865::readSPI(uint8_t addr, uint8_t *result, size_t size) {
     transaction.addr = addr & (MAX31865_REG_WRITE_OFFSET - 1);
     transaction.flags = SPI_TRANS_USE_RXDATA;
 
-    ESP_ERROR_CHECK(spi_device_acquire_bus(deviceHandle, portMAX_DELAY));
+    //ESP_ERROR_CHECK(spi_device_acquire_bus(deviceHandle, portMAX_DELAY));
     esp_err_t err = spi_device_transmit(deviceHandle, &transaction);
-    spi_device_release_bus(deviceHandle);
+    //spi_device_release_bus(deviceHandle);
 
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Error sending SPI transaction: %s", esp_err_to_name(err));
