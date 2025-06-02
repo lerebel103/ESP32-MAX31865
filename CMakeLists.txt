@@ -7,6 +7,8 @@ set(COMPONENT_SRCS
         "${CMAKE_CURRENT_SOURCE_DIR}/src/numerics.cpp"
         )
 
+set(COMPONENT_REQUIRES "esp_driver_spi" "driver")
+
 register_component()
 
 SET(CMAKE_CXX_STANDARD -std=c++14)
